@@ -12,19 +12,97 @@ update:
   update_watch_time: 1000-30000
 
 jobs:
-  - name: uaa_leader_z1
-    instances: 1
+  - name: postgres
     networks:
       - name: uaa1
-        static_ips: (( static_ips(0) ))
-  - name: uaa_z1
-    instances: 2
+        static_ips: [10.244.2.2]
+  - name: uaa
     networks:
       - name: uaa1
         static_ips: ~
-    properties:
-      uaa:
-        leader_address: (( jobs.uaa_leader_z1.networks.uaa1.static_ips.[0] ))
+
+properties:
+  uaa:
+    catalina_opts: -Xmx192m -XX:MaxPermSize=128m
+    jwt:
+      signing_key: |
+        -----BEGIN RSA PRIVATE KEY-----
+        MIICXAIBAAKBgQDHFr+KICms+tuT1OXJwhCUmR2dKVy7psa8xzElSyzqx7oJyfJ1
+        JZyOzToj9T5SfTIq396agbHJWVfYphNahvZ/7uMXqHxf+ZH9BL1gk9Y6kCnbM5R6
+        0gfwjyW1/dQPjOzn9N394zd2FJoFHwdq9Qs0wBugspULZVNRxq7veq/fzwIDAQAB
+        AoGBAJ8dRTQFhIllbHx4GLbpTQsWXJ6w4hZvskJKCLM/o8R4n+0W45pQ1xEiYKdA
+        Z/DRcnjltylRImBD8XuLL8iYOQSZXNMb1h3g5/UGbUXLmCgQLOUUlnYt34QOQm+0
+        KvUqfMSFBbKMsYBAoQmNdTHBaz3dZa8ON9hh/f5TT8u0OWNRAkEA5opzsIXv+52J
+        duc1VGyX3SwlxiE2dStW8wZqGiuLH142n6MKnkLU4ctNLiclw6BZePXFZYIK+AkE
+        xQ+k16je5QJBAN0TIKMPWIbbHVr5rkdUqOyezlFFWYOwnMmw/BKa1d3zp54VP/P8
+        +5aQ2d4sMoKEOfdWH7UqMe3FszfYFvSu5KMCQFMYeFaaEEP7Jn8rGzfQ5HQd44ek
+        lQJqmq6CE2BXbY/i34FuvPcKU70HEEygY6Y9d8J3o6zQ0K9SYNu+pcXt4lkCQA3h
+        jJQQe5uEGJTExqed7jllQ0khFJzLMx0K6tj0NeeIzAaGCQz13oo2sCdeGRHO4aDh
+        HH6Qlq/6UOV5wP8+GAcCQFgRCcB+hrje8hfEEefHcFpyKH+5g1Eu1k0mLrxK2zd+
+        4SlotYRHgPCEubokb2S1zfZDWIXW3HmggnGgM949TlY=
+        -----END RSA PRIVATE KEY-----
+      verification_key: |
+        -----BEGIN PUBLIC KEY-----
+        MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDHFr+KICms+tuT1OXJwhCUmR2d
+        KVy7psa8xzElSyzqx7oJyfJ1JZyOzToj9T5SfTIq396agbHJWVfYphNahvZ/7uMX
+        qHxf+ZH9BL1gk9Y6kCnbM5R60gfwjyW1/dQPjOzn9N394zd2FJoFHwdq9Qs0wBug
+        spULZVNRxq7veq/fzwIDAQAB
+        -----END PUBLIC KEY-----
+    cc:
+      client_secret: cc-secret
+    admin:
+      client_secret: admin-secret
+    batch:
+      username: batch-username
+      password: batch-password
+    clients:
+      <<: (( merge || nil ))
+      login:
+        secret: login-secret
+      notifications:
+        secret: notification-secret
+      doppler:
+        secret: doppler-secret
+      cloud_controller_username_lookup:
+        secret: cloud-controller-username-lookup-secret
+      gorouter:
+        secret: gorouter-secret
+    scim:
+      users:
+      - admin|admin|scim.write,scim.read,openid,cloud_controller.admin,clients.read,clients.write,doppler.firehose
+    no_ssl: true
+
+  uaadb:
+    db_scheme: postgresql
+    address: (( properties.databases.address ))
+    port: 5524
+    roles:
+      - tag: admin
+        name: uaaadmin
+        password: admin
+    databases:
+      - tag: uaa
+        name: uaadb
+        citext: true
+
+  databases:
+    db_scheme: postgres
+    address: (( jobs.postgres.networks.uaa1.static_ips.[0] ))
+    port: 5524
+    roles:
+      - tag: admin
+        name: ccadmin
+        password: admin
+      - tag: admin
+        name: uaaadmin
+        password: admin
+    databases:
+      - tag: cc
+        name: ccdb
+        citext: true
+      - tag: uaa
+        name: uaadb
+        citext: true
 
 compilation:
   cloud_properties:
@@ -65,7 +143,8 @@ networks:
     range: 10.244.2.12/30
     reserved:
     - 10.244.2.13
-    static: []
+    static:
+    - 10.244.2.14
   - cloud_properties:
       name: random
     range: 10.244.2.16/30

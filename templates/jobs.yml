@@ -9,29 +9,27 @@ update:
   serial: false
 
 jobs:
-  - name: uaa_leader_z1
+  - name: postgres
+    templates:
+    - name: postgres
+      release: uaa
+    instances: 1
+    resource_pool: small_z1
+    networks: (( merge ))
+    persistent_disk: 10240
+  - name: uaa
     templates:
     - name: uaa
       release: uaa
-    instances: 0
+    instances: 1
     resource_pool: small_z1
     networks: (( merge ))
-    persistent_disk: 0
-    properties: {}
-  - name: uaa_z1
-    templates:
-    - name: uaa
-      release: uaa
-    instances: 0
-    resource_pool: small_z1
-    networks: (( merge ))
-    persistent_disk: 0
-    update:
-      canaries: 10
-    properties:
-      uaa:
-        leader_address: (( merge ))
 
 networks: (( merge ))
 
-properties: {}
+properties:
+  uaa: (( merge ))
+  uaadb: (( merge ))
+
+  databases: ~
+

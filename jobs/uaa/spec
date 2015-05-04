@@ -1,13 +1,226 @@
 ---
 name: uaa
-packages: []
+
+description: "The UAA is the identity management service for Cloud Foundry. It's primary role is as an OAuth2 provider, issuing tokens for client applications to use when they act on behalf of Cloud Foundry users. It can also authenticate users with their Cloud Foundry credentials, and can act as an SSO service using those credentials (or others). It has endpoints for managing user accounts and for registering OAuth2 clients, as well as various other management functions."
+
 templates:
-  bin/monit_debugger: bin/monit_debugger
-  bin/uaa_ctl: bin/uaa_ctl
-  config/uaa.conf.erb: config/uaa.conf
-  data/properties.sh.erb: data/properties.sh
-  helpers/ctl_setup.sh: helpers/ctl_setup.sh
-  helpers/ctl_utils.sh: helpers/ctl_utils.sh
+  uaa_ctl.erb: bin/uaa_ctl
+  cf-registrar_ctl: bin/uaa_cf-registrar_ctl
+  install_crt.erb: bin/install_crt
+  dns_health_check.erb: bin/dns_health_check
+
+  cf-registrar.config.yml.erb: config/cf-registrar/config.yml
+  uaa.yml.erb: config/uaa.yml
+  varz.yml.erb: config/varz.yml
+  log4j.properties.erb: config/log4j.properties
+  varz.log4j.properties.erb: config/varz.log4j.properties
+  tomcat.logging.properties: config/tomcat/logging.properties
+  tomcat.server.xml.erb: config/tomcat/server.xml
+  ldap.crt.erb: config/ldap.crt
+
+packages:
+  - common
+  - ruby-2.1.4
+  - uaa
+
 properties:
-  uaa.leader_address:
-    description: Hostname/IP to the leader/master of the cluster
+  uaa.admin.client_secret:
+    description:
+  uaa.authentication.policy.lockoutAfterFailures:
+    description: "Number of allowed failures before account is locked"
+  uaa.authentication.policy.countFailuresWithinSeconds:
+    description: "Number of seconds in which lockoutAfterFailures failures must occur in order for account to be locked"
+  uaa.authentication.policy.lockoutPeriodSeconds:
+    description: "Number of seconds to lock out an account when lockoutAfterFailures failures is exceeded"
+  uaa.catalina_opts:
+    description:
+    default: -Xmx768m -XX:MaxPermSize=256m
+  uaa.cc.client_secret:
+    description:
+  uaa.cc.token_secret:
+    description:
+  uaa.client.autoapprove:
+    description:
+  uaa.user.authorities:
+    description: 'Contains a list of the default authorities/scopes assigned to a user.'
+    default:
+      - openid
+      - scim.me
+      - cloud_controller.read
+      - cloud_controller.write
+      - cloud_controller_service_permissions.read
+      - password.write
+      - uaa.user
+      - approvals.me
+      - oauth.approvals
+      - notification_preferences.read
+      - notification_preferences.write
+  uaa.openid.fallbackToAuthcode:
+    description: When using the hybrid flow to get a id_token, suppress the exception if the client doesn't have the implicit grant. Defaults to false.
+    default: true
+  uaa.clients:
+    description:
+  uaa.jwt.signing_key:
+    description:
+  uaa.jwt.verification_key:
+    description:
+  uaa.port:
+    description: Port that uaa will accept connections on
+    default: 8080
+  uaa.scim.user:
+    description:
+  uaa.scim.user.override:
+    description:
+  uaa.scim.userids_enabled:
+    description:
+    default: false
+  uaa.scim.users:
+    description:
+  uaa.scim.external_groups:
+    description: "A list of external group mappings. Pipe delimited. A value may look as '- internal.read|cn=developers,ou=scopes,dc=test,dc=com'"
+  domain:
+    description: "The domain name for this CloudFoundry deploy"
+  env.http_proxy:
+    description: "The http_proxy accross the VMs"
+  env.https_proxy:
+    description: "The https_proxy accross the VMs"
+  env.no_proxy:
+    description: "Set No_Proxy accross the VMs"
+  nats.password:
+    description: "Password for NATS login"
+  nats.port:
+    description: "TCP port of NATS server"
+  nats.user:
+    description: "User name for NATS login"
+  nats.machines:
+    description: "IP of each NATS cluster member."
+  networks.apps:
+    description: "The App network name"
+  uaadb.address:
+    description: "The UAA database IP address"
+  uaadb.databases:
+    description: "The list of databases used in UAA database including tag/name"
+  uaadb.db_scheme:
+    description: "Database scheme for UAA DB"
+  uaadb.port:
+    description: "The UAA database Port"
+  uaadb.roles:
+    description: "The list of database Roles used in UAA database including tag/name/password"
+  uaa.no_ssl:
+    description: "when true, uaa uses http, otherwise it uses https"
+    default: false
+  uaa.url:
+    description:
+  uaa.issuer:
+    description: "The url to use as the issuer URI"
+  uaa.dump_requests:
+    description:
+  uaa.login.client_secret:
+    description: 'Deprecated. Default login client secret if no login client is defined'
+  uaa.clients.login.secret:
+    description: 'Login client secret - overrides uaa.login.client_secret'
+  uaa.require_https:
+    description:
+  uaa.spring_profiles:
+    description: "Deprecated. Use 'uaa.ldap.enabled'. Sets the Spring profiles on the UAA web application. This gets combined with the 'uaadb.db_scheme' property if and only if the value is exactly 'ldap' in order to setup the database, for example 'ldap,mysql'. If spring_profiles contains more than just 'ldap' it will be used to overwrite spring_profiles and db_scheme ignored. See uaa.yml.erb."
+  uaa.ldap.enabled:
+    description: "Set to true to enable LDAP"
+    default: false
+  uaa.ldap.profile_type:
+    description: "The file to be used for configuring the LDAP authentication. options are simple-bind, search-and-bind and search-and-compare"
+    default: search-and-bind
+  uaa.ldap.url:
+    description: "The URL to the ldap server, must start with ldap:// or ldaps://"
+  uaa.ldap.userDNPattern:
+    description: "Used with simple-bind only. A semi-colon separated lists of DN patterns to construct a DN direct from the user ID without performing a search."
+  uaa.ldap.userDNPatternDelimiter:
+    description: "The delimiter character in between user DN patterns for simple bind authentication"
+    default: ";"
+  uaa.ldap.userDN:
+    description: "Used with search-and-bind and search-and-compare. A valid LDAP ID that has read permissions to perform a search of the LDAP tree for user information. "
+  uaa.ldap.userPassword:
+    description: "Used with search-and-bind and search-and-compare. Password for the LDAP ID that performs a search of the LDAP tree for user information."
+  uaa.ldap.searchBase:
+    description: "Used with search-and-bind and search-and-compare. Define a base where the search starts at."
+    default: ""
+  uaa.ldap.searchFilter:
+    description: "Used with search-and-bind and search-and-compare. Search filter used. Takes one parameter, user ID defined as {0}"
+    default: "cn={0}"
+  uaa.ldap.passwordAttributeName:
+    description: "Used with search-and-compare only. The name of the password attribute in the LDAP directory"
+    default: "userPassword"
+  uaa.ldap.localPasswordCompare:
+    description: "Used with search-and-compare only. Set to true if passwords are retrieved by the search, and should be compared in the login server."
+    default: "true"
+  uaa.ldap.passwordEncoder:
+    description: "Used with search-and-compare only. The encoder used to properly encode user password to match the one in the LDAP directory."
+    default: "org.cloudfoundry.identity.uaa.ldap.DynamicPasswordComparator"
+  uaa.ldap.sslCertificate:
+    description: "Used with ldaps:// URLs. The certificate, if self signed, to be trusted by this connection."
+  uaa.ldap.sslCertificateAlias:
+    description: "Used with ldaps:// URLs. The certificate alias, to be trusted by this connection and stored in the keystore."
+  uaa.ldap.mailAttributeName:
+    description: "The name of the LDAP attribute that contains the users email address"
+    default: mail
+  uaa.ldap.mailSubstitute:
+    description: "Defines an email pattern containing a {0} to generate an email address for an LDAP user during authentication"
+    default: ''
+  uaa.ldap.mailSubstituteOverridesLdap:
+    description: "Set to true if you wish to override an LDAP user email address with a generated one"
+    default: false
+  uaa.ldap.groups.profile_type:
+    description: "What type of group integration should be used. Values are no-groups, groups-as-scopes and groups-map-to-scopes"
+    default: "no-groups"
+  uaa.ldap.groups.autoAdd:
+    description: "Set to true when profile_type=groups_as_scopes to auto create scopes for a user. Ignored for other profiles."
+    default: "true"
+  uaa.ldap.groups.searchBase:
+    description: "Search start point for a user group membership search"
+    default: ""
+  uaa.ldap.groups.groupRoleAttribute:
+    description: "Used with groups-as-scopes, defines the attribute that holds the scope name(s)."
+  uaa.ldap.groups.groupSearchFilter:
+    description: "Search query filter to find groups a user belongs to, or for a nested search, groups that a group belongs to"
+    default: "member={0}"
+  uaa.ldap.groups.searchSubtree:
+    description: "Boolean value, set to true to search below the search base"
+    default: "true"
+  uaa.ldap.groups.maxSearchDepth:
+    description: "Set to number of levels a nested group search should go. Set to 1 to disable nested groups (default)"
+    default: "1"
+  login.ldap.profile_type:
+    description: "See uaa.ldap.profile_type - login.ldap prefix is used for backwards compatibility to enable ldap from login config"
+  login.ldap.url:
+    description: "See uaa.ldap.url - login.ldap prefix is used for backwards compatibility to enable ldap from login config"
+  login.ldap.userDNPattern:
+    description: "See uaa.ldap.userDNPattern - login.ldap prefix is used for backwards compatibility to enable ldap from login config"
+  login.ldap.userDN:
+    description: "See uaa.ldap.userDN - login.ldap prefix is used for backwards compatibility to enable ldap from login config"
+  login.ldap.userPassword:
+    description: "See uaa.ldap.userPassword - login.ldap prefix is used for backwards compatibility to enable ldap from login config"
+  login.ldap.searchBase:
+    description: "See uaa.ldap.searchBase - login.ldap prefix is used for backwards compatibility to enable ldap from login config"
+    default: ""
+  login.ldap.searchFilter:
+    description: "See uaa.ldap.searchFilter - login.ldap prefix is used for backwards compatibility to enable ldap from login config"
+    default: "cn={0}"
+  login.ldap.passwordAttributeName:
+    description: "See uaa.ldap.passwordAttributeName - login.ldap prefix is used for backwards compatibility to enable ldap from login config"
+    default: "userPassword"
+  login.ldap.localPasswordCompare:
+    description: "See uaa.ldap.localPasswordCompare - login.ldap prefix is used for backwards compatibility to enable ldap from login config"
+    default: "true"
+  login.ldap.passwordEncoder:
+    description: "See uaa.ldap.passwordEncoder - login.ldap prefix is used for backwards compatibility to enable ldap from login config"
+    default: "org.cloudfoundry.identity.uaa.login.ldap.DynamicPasswordComparator"
+  login.ldap.sslCertificate:
+    description: "See uaa.ldap.sslCertificate - login.ldap prefix is used for backwards compatibility to enable ldap from login config"
+  login.ldap.sslCertificateAlias:
+    description: "See uaa.ldap.sslCertificateAlias - login.ldap prefix is used for backwards compatibility to enable ldap from login config"
+  login.spring_profiles:
+    description: "See uaa.spring_profiles - login.spring_profiles is used for backwards compatibility to enable ldap from login config"
+  login.protocol:
+    description: "The protocol that the Login Server uses. http/https"
+  uaa.restricted_ips_regex:
+    description: "A pipe delimited set of regular expressions of IP addresses that can reach the listening HTTP port of the server."
+    default: 10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|169\.254\.\d{1,3}\.\d{1,3}|127\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.1[6-9]{1}\.\d{1,3}\.\d{1,3}|172\.2[0-9]{1}\.\d{1,3}\.\d{1,3}|172\.3[0-1]{1}\.\d{1,3}\.\d{1,3}

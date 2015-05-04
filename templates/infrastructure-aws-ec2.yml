@@ -9,19 +9,14 @@ meta:
     version: latest
 
 jobs:
-  - name: uaa_leader_z1
-    instances: 1
+  - name: postgres
     networks:
       - name: uaa1
+        static_ips: ~
     persistent_disk: (( meta.persistent_disk ))
-  - name: uaa_z1
-    instances: 2
+  - name: uaa
     networks:
       - name: uaa1
-    persistent_disk: (( meta.persistent_disk ))
-    properties:
-      uaa:
-        leader_address: (( "0.uaa-leader-z1.uaa1." meta.environment "." meta.dns_root ))
 
 compilation:
   cloud_properties:
