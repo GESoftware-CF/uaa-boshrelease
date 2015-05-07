@@ -2,14 +2,16 @@
 
 ## Usage
 
-To use this bosh release, first upload it to your bosh:
+To use this bosh release:
 
 ```
-bosh target BOSH_HOST
 git clone https://github.com/cloudfoundry-community/uaa-boshrelease.git
 cd uaa-boshrelease
-bosh upload release releases/uaa-1.yml
+bosh create release --force
+bosh upload release
+bosh -n deploy
 ```
+The blobs for postgres, ruby, java, tomcat etc. should get downloaded from S3 community bucket for bosh blobs. 
 
 For [bosh-lite](https://github.com/cloudfoundry/bosh-lite), you can quickly create a deployment manifest & deploy a cluster:
 
