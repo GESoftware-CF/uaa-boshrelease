@@ -1,1 +1,45 @@
---- {}
+---
+postgres/postgres-9.0.3-1.amd64.tar.gz:
+  object_id: 2c2f85ac-96d2-42d7-9115-a7fc546dd7a0
+  sha: e47ee9c841ecde4df121f44df282aeb3c50a48d2
+  size: 16203511
+postgres/postgres-9.0.3-1.i386.tar.gz:
+  object_id: 1af81717-8cdd-48e4-9433-b278eabeff67
+  sha: b2bde31e720eb219bfdc9f1b784f985ecca2cbfb
+  size: 15111387
+ruby-2.1.4/bundler-1.7.4.gem:
+  object_id: b2220811-9745-486d-8169-d72086956c6c
+  sha: e11eb7f9b807f5b7f3beb7c23a06803c7484aebc
+  size: 301568
+ruby-2.1.4/ruby-2.1.4.tar.gz:
+  object_id: d63ef7e3-eea9-48bf-ae3e-6e784c6ea0b6
+  sha: 29e9cfdd9e989b7621d7696ef3f970262a08dbc3
+  size: 15127418
+ruby-2.1.4/rubygems-2.4.2.tgz:
+  object_id: 920e5c98-c2fa-4e77-ab64-bad61af191f3
+  sha: 538f7a264798377e5a63056f979c43f441613ff3
+  size: 440555
+ruby-2.1.4/yaml-0.1.6.tar.gz:
+  object_id: 06823dc0-f3b8-40cb-8f74-eee52c4da718
+  sha: f3d404e11bec3c4efcddfd14c42d46f1aabe0b5d
+  size: 503012
+uaa/apache-tomcat-7.0.55.tar.gz:
+  object_id: 683b4dab-e5f7-4338-bee0-6ad7c69113f4
+  sha: 4e23f1e3d6d24e0affebe78f6f5c5d5a49eb4e37
+  size: 8941662
+uaa/cloudfoundry-identity-varz-1.0.2.war:
+  object_id: 0408f689-205e-4fa5-82bb-51dc55859db3
+  sha: 8c35ed35fb6dfc4a97a243447763c635812066e8
+  size: 5727747
+uaa/openjdk-1.7.0-u40-unofficial-linux-amd64.tgz:
+  object_id: 8c3cb6fd-427e-47ca-9e11-9e05db5d851f
+  sha: bb41c68e0dc26ad71635d4bff8da16246ded10f0
+  size: 42574624
+uaa/openjdk-1.7.0-u40-unofficial-macosx-x86_64-bundle.tgz:
+  object_id: f711fd60-72ea-4cf5-94ef-fd5782f2855e
+  sha: ac7febc5bbff2dedf8add624a727a4c0ac6c3d10
+  size: 65991397
+uaa/openjdk-1.7.0_51.tar.gz:
+  object_id: 4dcee082-1375-4864-aacb-0a311686c3c2
+  sha: 0f4d3705e3a4e1452250def57cfc36ab6cc37355
+  size: 34729532

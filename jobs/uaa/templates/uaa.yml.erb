@@ -62,6 +62,8 @@ authentication:
 <% end %>
 
 <% scheme = p("uaa.no_ssl") ? "http" : "https" %>
+uaa.url: <%= "#{scheme}" %>://<%= p("uaa.domain") %>:<%= p("uaa.port") %>/uaa
+login.url: <%= "#{scheme}" %>://<%= p("uaa.domain") %>:<%= p("uaa.port") %>/login
 issuer.uri: <%= p("uaa.issuer", p("uaa.url", "#{scheme}://uaa.#{properties.domain}")) %>
 
 oauth:
