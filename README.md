@@ -36,6 +36,7 @@ The blobs for postgres, ruby, java, tomcat etc. should get downloaded from S3 co
   * bosh -n deploy
 * Check status: Use the command below to check the VMs & log into the one you want
   * bosh vms
+  * Map the IP address of VM running uaa to uaas in your /etc/hosts file. This will allow you to use CURL, browser or uaac to     access to UAA at: http://uaas:8080
   * bosh ssh 
 ```
 
