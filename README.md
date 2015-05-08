@@ -18,8 +18,8 @@ bosh -n deploy
 ```
 The blobs for postgres, ruby, java, tomcat etc. should get downloaded from S3 community bucket for bosh blobs. 
 
+### Detailed Steps
 ```
-### Detailed Steps:
 * Start up bosh-lite:  vagrant up --provider=virtualbox
 * Set the bosh cli target to bosh lite & login.
   * bosh target 192.168.50.4 lite
