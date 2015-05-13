@@ -17,6 +17,148 @@ jobs:
   - name: uaa
     networks:
       - name: uaa1
+        static_ips: ~      
+
+properties:
+  uaa:
+    catalina_opts: -Xmx192m -XX:MaxPermSize=128m
+    jwt:
+      signing_key: |
+        -----BEGIN RSA PRIVATE KEY-----
+        MIICXAIBAAKBgQDHFr+KICms+tuT1OXJwhCUmR2dKVy7psa8xzElSyzqx7oJyfJ1
+        JZyOzToj9T5SfTIq396agbHJWVfYphNahvZ/7uMXqHxf+ZH9BL1gk9Y6kCnbM5R6
+        0gfwjyW1/dQPjOzn9N394zd2FJoFHwdq9Qs0wBugspULZVNRxq7veq/fzwIDAQAB
+        AoGBAJ8dRTQFhIllbHx4GLbpTQsWXJ6w4hZvskJKCLM/o8R4n+0W45pQ1xEiYKdA
+        Z/DRcnjltylRImBD8XuLL8iYOQSZXNMb1h3g5/UGbUXLmCgQLOUUlnYt34QOQm+0
+        KvUqfMSFBbKMsYBAoQmNdTHBaz3dZa8ON9hh/f5TT8u0OWNRAkEA5opzsIXv+52J
+        duc1VGyX3SwlxiE2dStW8wZqGiuLH142n6MKnkLU4ctNLiclw6BZePXFZYIK+AkE
+        xQ+k16je5QJBAN0TIKMPWIbbHVr5rkdUqOyezlFFWYOwnMmw/BKa1d3zp54VP/P8
+        +5aQ2d4sMoKEOfdWH7UqMe3FszfYFvSu5KMCQFMYeFaaEEP7Jn8rGzfQ5HQd44ek
+        lQJqmq6CE2BXbY/i34FuvPcKU70HEEygY6Y9d8J3o6zQ0K9SYNu+pcXt4lkCQA3h
+        jJQQe5uEGJTExqed7jllQ0khFJzLMx0K6tj0NeeIzAaGCQz13oo2sCdeGRHO4aDh
+        HH6Qlq/6UOV5wP8+GAcCQFgRCcB+hrje8hfEEefHcFpyKH+5g1Eu1k0mLrxK2zd+
+        4SlotYRHgPCEubokb2S1zfZDWIXW3HmggnGgM949TlY=
+        -----END RSA PRIVATE KEY-----
+      verification_key: |
+        -----BEGIN PUBLIC KEY-----
+        MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDHFr+KICms+tuT1OXJwhCUmR2d
+        KVy7psa8xzElSyzqx7oJyfJ1JZyOzToj9T5SfTIq396agbHJWVfYphNahvZ/7uMX
+        qHxf+ZH9BL1gk9Y6kCnbM5R60gfwjyW1/dQPjOzn9N394zd2FJoFHwdq9Qs0wBug
+        spULZVNRxq7veq/fzwIDAQAB
+        -----END PUBLIC KEY-----
+    cc:
+      client_secret: cc-secret
+    admin:
+      id: admin
+      authorized-grant-types: client_credentials
+      authorities: clients.admin,clients.read,clients.write,clients.secret,uaa.admin,scim.read,scim.write,scim.userids,password.write
+      client_secret: adminsecret
+    batch:
+      username: batch-username
+      password: batch-password
+    clients:
+      <<: (( merge || nil ))
+      app:
+        id: app
+        name: The Ultimate Oauth App
+        secret: appclientsecret
+        authorized-grant-types: password,implicit,authorization_code,client_credentials
+        scope: cloud_controller.read,cloud_controller.write,openid,password.write,scim.userids,organizations.acme
+        authorities: uaa.resource
+        autoapprove:
+          - openid
+        signup_redirect_url: http://localhost:8080/app/
+        change_email_redirect_url: http://localhost:8080/app/
+        invitation_redirect_url: http://localhost:8080/app/
+      cf:
+        id: cf
+        authorized-grant-types: implicit,password,refresh_token
+        scope: cloud_controller.read,cloud_controller.write,openid,password.write,scim.userids,cloud_controller.admin,scim.read,scim.write
+        authorities: uaa.none
+        autoapprove: true
+        resource-ids: none
+        redirect-uri: https://uaa.cloudfoundry.com/redirect/cf
+      cloud_controller:
+        secret: cloudcontrollersecret
+        authorized-grant-types: client_credentials
+        scope: scim.read,scim.write,password.write
+        authorities: uaa.resource,scim.read,scim.write,password.write
+        resource-ids: none
+      identity:
+        secret: identitysecret
+        authorized-grant-types: authorization_code,client_credentials,refresh_token
+        scope: cloud_controller.admin,cloud_controller.read,cloud_controller.write,openid,zones.*.admin,zones.read,zones.write
+        authorities: scim.zones,zones.read,cloud_controller.read,uaa.resource,zones.write
+        autoapprove: true
+      login:
+        secret: loginsecret
+        authorities: oauth.login,scim.write,clients.read,notifications.write,critical_notifications.write,emails.write,scim.userids,password.write
+        authorized-grant-types: client_credentials,authorization_code
+        autoapprove: true
+        scope: openid,oauth.approvals
+      notifications:
+        secret: notification-secret
+      doppler:
+        secret: doppler-secret
+      cloud_controller_username_lookup:
+        secret: cloud-controller-username-lookup-secret
+      gorouter:
+        secret: gorouter-secret
+    user:
+      authorities:
+        - openid
+        - scim.me
+        - cloud_controller.read
+        - cloud_controller.write
+        - cloud_controller_service_permissions.read
+        - password.write
+        - scim.userids
+        - uaa.user
+        - approvals.me
+        - oauth.approvals
+    scim:
+      groups: acme,acme.dev,acme.qa
+      group_membership:
+        - acme|acme.dev,acme.qa
+        - acme.dev|marissa
+      users:
+        - admin|admin|scim.write,scim.read,openid,cloud_controller.admin,clients.read,clients.write,doppler.firehose
+        - marissa|koala|marissa@test.org|Marissa|Bloggs|uaa.user
+      userids_enabled: true
+    no_ssl: true
+    domain: uaas
+
+  uaadb:
+    db_scheme: postgresql
+    address: (( properties.databases.address ))
+    port: 5524
+    roles:
+      - tag: admin
+        name: uaaadmin
+        password: admin
+    databases:
+      - tag: uaa
+        name: uaadb
+        citext: true
+
+  databases:
+    db_scheme: postgres
+    address: (( jobs.postgres.networks.uaa1.dynamic_ips.[0] ))
+    port: 5524
+    roles:
+      - tag: admin
+        name: ccadmin
+        password: admin
+      - tag: admin
+        name: uaaadmin
+        password: admin
+    databases:
+      - tag: cc
+        name: ccdb
+        citext: true
+      - tag: uaa
+        name: uaadb
+        citext: true
 
 compilation:
   cloud_properties:

@@ -1,5 +1,10 @@
 # BOSH Release for uaa
 
+## Contents:
+* Bosh release files for UAA
+* UAA as a git submodule under src - no plans to make changes at this point. Make sure you fetch the submodule before using the release. Use --recursive during pull or git submodule init & git submodule update to get the src/uaa.
+
+
 ## Usage
 
 To use this bosh release:
@@ -13,51 +18,38 @@ bosh -n deploy
 ```
 The blobs for postgres, ruby, java, tomcat etc. should get downloaded from S3 community bucket for bosh blobs. 
 
-For [bosh-lite](https://github.com/cloudfoundry/bosh-lite), you can quickly create a deployment manifest & deploy a cluster:
-
+### Detailed Steps
 ```
-templates/make_manifest warden
-bosh -n deploy
-```
-
-For AWS EC2, create a single VM:
-
-```
-templates/make_manifest aws-ec2
-bosh -n deploy
-```
-
-### Override security groups
-
-For AWS & Openstack, the default deployment assumes there is a `default` security group. If you wish to use a different security group(s) then you can pass in additional configuration when running `make_manifest` above.
-
-Create a file `my-networking.yml`:
-
-``` yaml
----
-networks:
-  - name: uaa1
-    type: dynamic
-    cloud_properties:
-      security_groups:
-        - uaa
+* Start up bosh-lite:  vagrant up --provider=virtualbox
+* Set the bosh cli target to bosh lite & login.
+  * bosh target 192.168.50.4 lite
+  * bosh login
+* Create a Bosh release. Everytime you make changes to yaml or configuration files associated with any of the jobs. You need to create a new release. Name it "uaa". Use the flag --force to make sure you create a development release. Final release is created with --final option.
+  * bosh create release --force
+* This release needs to be uploaded to the bosh director, when running locally it is bosh-lite.
+  * bosh upload release
+* Upload the stemcell to be used by the bosh director. For bosh-lite we will use: bosh-warden-boshlite-ubuntu-trusty-go_agent.
+  * Download this stemcell from bosh.io & then upload it using: bosh upload stemcell <stemcell>
+* Create the manifest file. In our case on bosh-lite we need to create manifest for the warden container. Run the following command:
+  * templates/make_manifest warden
+* Deploy:
+  * bosh -n deploy
+* Check status: Use the command below to check the VMs & log into the one you want
+  * bosh vms
+  * Map the IP address of VM running uaa to uaas in your /etc/hosts file. This will allow you to use CURL, browser or uaac to     access to UAA at: http://uaas:8080
+  * bosh ssh 
 ```
 
-Where `- uaa` means you wish to use an existing security group called `uaa`.
 
-You now suffix this file path to the `make_manifest` command:
+### Tips:
+ * Check the releases available: bosh releases
+ * Check the stemcells available: bosh stemcells
+ * Check the VMs and their status: bosh vms
+
 
 ```
 templates/make_manifest openstack-nova my-networking.yml
 bosh -n deploy
-```
-
-### Development
-
-As a developer of this release, create new releases and upload them:
-
-```
-bosh create release --force && bosh -n upload release
 ```
 
 ### Final releases
@@ -74,5 +66,3 @@ By default the version number will be bumped to the next major number. You can s
 ```
 bosh create release --final --version 2.1
 ```
-
-After the first release you need to contact [Dmitriy Kalinin](mailto://dkalinin@pivotal.io) to request your project is added to https://bosh.io/releases (as mentioned in README above).
