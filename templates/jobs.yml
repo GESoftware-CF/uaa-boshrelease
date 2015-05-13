@@ -29,6 +29,7 @@ networks: (( merge ))
 
 properties:
   uaa: (( merge ))
+  login_server: ((merge))
   uaadb: (( merge ))
 
   databases: ~

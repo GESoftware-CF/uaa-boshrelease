@@ -1,0 +1,36 @@
+---
+<% scheme = properties.uaa.no_ssl ? "http" : "https" %>
+<% uaa_url = "#{scheme}" + "://" + properties.uaa.domain + ":" + properties.uaa.port.to_s %>
+
+login:
+  url: <%= uaa_url %>
+  authorize:
+    url: <%= uaa_url %>/oauth/authorize
+  invitationsEnabled: <%= properties.login_server.login && (!properties.login_server.login.invitationsEnabled.nil?) ? properties.login_server.login.invitationsEnabled : false %>
+
+uaa:
+  # The hostname of the UAA that this login server will connect to
+  url: <%= uaa_url %>
+  token:
+    url: <%= uaa_url %>/oauth/token
+  approvals:
+    url: <%= uaa_url %>/approvals
+  login:
+    url: <%= uaa_url %>/authenticate
+
+# The secret that this login server will use to authenticate to the uaa
+LOGIN_SECRET: loginsecret
+
+<% if !properties.login_server.smtp %>
+smtp:
+  host: localhost
+  port: 2525
+  user:
+  password:
+<% else %>
+smtp:
+  host: <%= (!properties.login_server.smtp.host.nil?) ? properties.login_server.smtp.host : localhost %>
+  port: <%= (!properties.login_server.smtp.port.nil?) ? properties.login_server.smtp.port : 2525 %>
+  user: <%= (!properties.login_server.smtp.user.nil?) ? properties.login_server.smtp.user : "" %>
+  password: <%= (!properties.login_server.smtp.password.nil?) ? properties.login_server.smtp.password : "" %>
+<% end %>

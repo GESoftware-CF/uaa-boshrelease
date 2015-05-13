@@ -51,27 +51,105 @@ properties:
     cc:
       client_secret: cc-secret
     admin:
-      client_secret: admin-secret
+      client_secret: adminsecret
     batch:
       username: batch-username
       password: batch-password
     clients:
       <<: (( merge || nil ))
+      admin:
+        id: admin
+        authorities: clients.admin,clients.read,clients.write,clients.secret,scim.read,scim.write,uaa.admin
+        authorized-grant-types: client_credentials
+        scope: uaa.none
+        secret: adminsecret
+      app:
+        id: app
+        name: The Ultimate Oauth App
+        authorities: uaa.resource
+        authorized-grant-types: password,implicit,authorization_code,client_credentials
+        autoapprove:
+          - openid
+        scope: cloud_controller.read,cloud_controller.write,openid,password.write,scim.userids,organizations.acme
+        secret: appclientsecret
+        signup_redirect_url: http://localhost:8080/app/
+        change_email_redirect_url: http://localhost:8080/app/
+        invitation_redirect_url: http://localhost:8080/app/
+      cf:
+        id: cf
+        authorities: uaa.none
+        authorized-grant-types: implicit,password,refresh_token
+        autoapprove: true
+        scope: cloud_controller.read,cloud_controller.write,openid,password.write,scim.userids,cloud_controller.admin,scim.read,scim.write,doppler.firehose
+      cloud_controller:
+        authorities: uaa.resource,scim.read,scim.write,password.write
+        authorized-grant-types: client_credentials
+        resource-ids: none
+        scope: scim.read,scim.write,password.write
+        secret: cloudcontrollersecret
+      dashboard:
+        id: dashboard
+        authorities: uaa.resource
+        authorized-grant-types: authorization_code
+        scope: dashboard.user,openid
+        secret: dashboardsecret
+      identity:
+        id: identity
+        authorities: scim.zones,zones.read,cloud_controller.read,uaa.resource,zones.write
+        authorized-grant-types: authorization_code,client_credentials,refresh_token
+        autoapprove: true
+        scope: cloud_controller.admin,cloud_controller.read,cloud_controller.write,openid,zones.*.admin,zones.read,zones.write
+        secret: identitysecret
       login:
-        secret: login-secret
+        authorities: oauth.login,scim.write,clients.read,notifications.write,critical_notifications.write,emails.write,scim.userids,password.write
+        authorized-grant-types: client_credentials,authorization_code
+        autoapprove: true
+        scope: openid,oauth.approvals
+        secret: loginsecret
       notifications:
-        secret: notification-secret
+        id: notifications
+        authorities: cloud_controller.admin,scim.read
+        authorized-grant-types: client_credentials
+        secret: notificationssecret
       doppler:
         secret: doppler-secret
       cloud_controller_username_lookup:
         secret: cloud-controller-username-lookup-secret
       gorouter:
         secret: gorouter-secret
+    client:
+      autoapprove:
+        - cf
+    user:
+        authorities:
+          - openid
+          - scim.me
+          - cloud_controller.read
+          - cloud_controller.write
+          - cloud_controller_service_permissions.read
+          - password.write
+          - scim.userids
+          - uaa.user
+          - approvals.me
+          - oauth.approvals
     scim:
+      groups: acme,acme.dev,acme.qa
+      group_membership:
+        - acme|acme.dev,acme.qa
+        - acme.dev|marissa
       users:
-      - admin|admin|scim.write,scim.read,openid,cloud_controller.admin,clients.read,clients.write,doppler.firehose
+        - admin|admin|scim.write,scim.read,openid,cloud_controller.admin,clients.read,clients.write,doppler.firehose
+        - marissa|koala|marissa@test.org|Marissa|Bloggs|uaa.user
+      userids_enabled: true
     no_ssl: true
     domain: uaas
+
+  login_server:
+    login:
+      invitationsEnabled: true
+    smtp:
+      host: 3.39.76.31
+      port: 2525
 
   uaadb:
     db_scheme: postgresql

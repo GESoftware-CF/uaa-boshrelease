@@ -11,6 +11,7 @@ templates:
 
   cf-registrar.config.yml.erb: config/cf-registrar/config.yml
   uaa.yml.erb: config/uaa.yml
+  login.yml.erb: config/login.yml
   varz.yml.erb: config/varz.yml
   log4j.properties.erb: config/log4j.properties
   varz.log4j.properties.erb: config/varz.log4j.properties
@@ -225,4 +226,14 @@ properties:
     description: "A pipe delimited set of regular expressions of IP addresses that can reach the listening HTTP port of the server."
     default: 10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|169\.254\.\d{1,3}\.\d{1,3}|127\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.1[6-9]{1}\.\d{1,3}\.\d{1,3}|172\.2[0-9]{1}\.\d{1,3}\.\d{1,3}|172\.3[0-1]{1}\.\d{1,3}\.\d{1,3}
   uaa.domain:
-    description: Domain to be used by the UAA deployment
+    description: "Domain to be used by the UAA deployment"
+  login_server.login.invitationsEnabled:
+    description: "Set to true to enable invitations in login server."
+  login_server.smtp.host:
+    description: "Hostname of SMTP server used by UAA login server."
+  login_server.smtp.port:
+    description: "Port of SMTP server used by UAA login server."
+  login_server.smtp.user:
+    description: "Username used to connect to SMTP server used by UAA login server."
+  login_server.smtp.password:
+    description: "Password used to connect to SMTP server used by UAA login server."
