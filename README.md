@@ -51,6 +51,10 @@ The blobs for postgres, ruby, java, tomcat etc. should get downloaded from S3 co
 templates/make_manifest openstack-nova my-networking.yml
 bosh -n deploy
 ```
+### AWS Environment:
+  * Use following commands to map port 8080 to 80 on AWS test/staging/prod deployments
+  * # iptables -t nat -I OUTPUT -p tcp -d 127.0.0.1 --dport 80 -j REDIRECT --to-ports 8080
+
 
 ### Final releases
 
