@@ -126,8 +126,8 @@ properties:
         - marissa|koala|marissa@test.org|Marissa|Bloggs|uaa.user
       userids_enabled: true
     no_ssl: true
-    domain: uaas
-  
+    domain: predix-uaa-test.ice.ge.com
+
   login_server:
     login:
       invitationsEnabled: true
@@ -176,13 +176,22 @@ resource_pools:
     cloud_properties:
       instance_type: m1.small
 
-networks:
-  - name: floating
-    type: vip
-    cloud_properties: {}
-  - name: uaa1
-    type: dynamic
-    cloud_properties:
-      subnet: subnet-25cc6e0e
 
+networks:
+- name: uaa1
+  subnets:
+  - cloud_properties:
+      security_groups:
+      - cf
+      subnet: subnet-25cc6e0e
+    dns:
+    - 10.202.95.105
+    gateway: 10.202.74.1
+    name: default_unused
+    range: 10.202.74.0/25
+    reserved:
+    - 10.202.74.2 - 10.202.74.40
+    static:
+    - 10.202.74.41 - 10.202.74.45
+  type: manual
 
