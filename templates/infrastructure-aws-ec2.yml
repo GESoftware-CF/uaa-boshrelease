@@ -3,7 +3,7 @@ meta:
   dns_root: (( merge ))
   security_groups: (( merge ))
   persistent_disk: 4096
-
+  security_groups: cf
   stemcell:
     name: bosh-aws-xen-ubuntu
     version: latest
@@ -12,7 +12,7 @@ jobs:
   - name: postgres
     networks:
       - name: uaa1
-        static_ips: ~
+        static_ips: [ 10.202.74.42 ]
     persistent_disk: (( meta.persistent_disk ))
   - name: uaa
     networks:
@@ -127,6 +127,13 @@ properties:
       userids_enabled: true
     no_ssl: true
     domain: uaas
+  
+  login_server:
+    login:
+      invitationsEnabled: true
+    smtp:
+      host: 3.39.76.31
+      port: 2525
 
   uaadb:
     db_scheme: postgresql
@@ -143,7 +150,7 @@ properties:
 
   databases:
     db_scheme: postgres
-    address: (( jobs.postgres.networks.uaa1.dynamic_ips.[0] ))
+    address: (( jobs.postgres.networks.uaa1.static_ips.[0] ))
     port: 5524
     roles:
       - tag: admin
@@ -176,4 +183,6 @@ networks:
   - name: uaa1
     type: dynamic
     cloud_properties:
-      security_groups: (( meta.security_groups ))
+      subnet: subnet-25cc6e0e
+
+
